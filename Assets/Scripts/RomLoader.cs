@@ -12,4 +12,12 @@ public class RomLoader
         }
         Memory.fileSize = (uint)romData.Length;
     }
+    public void LoadRomBytes(byte[] romBytes)
+    {
+        for (int i = 0; i < romBytes.Length; i++)
+        {
+            Memory.memory[0x200 + i] = romBytes[i];
+        }
+        Memory.fileSize = (uint)romBytes.Length;
+    }
 }

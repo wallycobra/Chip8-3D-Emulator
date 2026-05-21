@@ -23,7 +23,7 @@ public class OpcodeHandler
                 {
                     case 0x00E0: // Clear the display
                         Debug.Log("Opcode 00E0: Clear the display");
-                        ClearDisplay();
+                        cpu.ClearDisplay();
                         break;
                     case 0x00EE: // Return from subroutine
                         Debug.Log("Opcode 00EE: Return from subroutine");
@@ -259,16 +259,5 @@ public class OpcodeHandler
                 break;
         }
     }
-    private void ClearDisplay()
-    {
-        for (int x = 0; x < 64; x++)
-        {
-            for (int y = 0; y < 32; y++)
-            {
-                cpu.display[x, y] = false;
-                cpu.cubeDisplay.Render(x, y, false);
-            }
-        }
-        Debug.Log("Display cleared.");
-    }
+    
 }

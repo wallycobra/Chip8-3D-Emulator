@@ -17,11 +17,13 @@ public class CPU : MonoBehaviour
     private float timerAccumulator;
     [SerializeField] private float cyclesPerSecond = 500;
     private float cycleAccumulator;
+    private bool isPaused = false;
 
     public CPU()
     {
         opcodeHandler = new OpcodeHandler(this);
         cubeDisplay = new CubeDisplay();
+        romLoader = new RomLoader();
     }
     private void LoadFontSet()
     {
@@ -32,9 +34,14 @@ public class CPU : MonoBehaviour
     }
     public void LoadRomToMemory()
     {
-        romLoader = new RomLoader();
-        romLoader.LoadRom($"{UnityEngine.Application.dataPath}/Resources/Breakout.ch8");
+        romLoader.LoadRom($"{UnityEngine.Application.dataPath}/Resources/Roms/Breakout.ch8");
     }
+    public void LoadRom(byte[] romBytes)
+    {
+        Reset();
+        romLoader.LoadRomBytes(romBytes);
+    }
+
     public void Cycle()
     {
         // Fetch opcode (2 bytes)
@@ -48,13 +55,19 @@ public class CPU : MonoBehaviour
     void Start()
     {
         LoadFontSet();
-        LoadRomToMemory();
-        //ShowOpcodes();
         cubeDisplay.Initialize();
     }
 
+    public void SetPaused(bool paused)
+    {
+        isPaused = paused;
+    }
     private void Update()
     {
+        if (isPaused)
+        {
+            return;
+        }
         UpdateKeys();
 
         RunCpuCycles();
@@ -139,6 +152,40 @@ public class CPU : MonoBehaviour
         Keys[0x0] = Input.GetKey(KeyCode.X);
         Keys[0xB] = Input.GetKey(KeyCode.C);
         Keys[0xF] = Input.GetKey(KeyCode.V);
+
+        if(Input.GetKeyDown(KeyCode.P))
+        {
+            isPaused = !isPaused;
+        }
+    }
+
+    public void Reset()
+    {
+        Memory.memory = new byte[4096];
+        V = new byte[16];
+        Stack = new ushort[16];
+
+        I = 0;
+        Memory.pc = 0x200;
+        SP = 0;
+        delayTimer = 0;
+        soundTimer = 0;
+
+        ClearDisplay();
+
+        LoadFontSet();
+    }
+    public void ClearDisplay()
+    {
+        for (int x = 0; x < 64; x++)
+        {
+            for (int y = 0; y < 32; y++)
+            {
+                display[x, y] = false;
+                cubeDisplay.Render(x, y, false);
+            }
+        }
+        Debug.Log("Display cleared.");
     }
     
 }
